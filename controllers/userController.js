@@ -46,7 +46,7 @@ const addBillData = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        user.addBillData(req.body);
+        user.addBillData(req.body.data);
         await user.save();
         res.status(201).json(user);
     } catch (error) {

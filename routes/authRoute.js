@@ -93,7 +93,7 @@ router.post('/verify-otp', async (req, res) => {
         // Generate a JSON Web Token
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1y' });
 
-        res.status(200).json({ token });
+        res.status(200).json({ token , userType: user.userType, userId: user._id, data: user.data, email: user.email });
     } catch (error) {
         console.error(error);
         res.status(500).json({message: res.json(error.message) });

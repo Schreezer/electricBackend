@@ -14,7 +14,7 @@ app.use(express.json());
 
 // Enable CORS for a specific origin (replace with actual Flutter app origin)
 app.use(cors({
-    origin: 'http://localhost:50760'
+    origin: 'http://localhost:8080'
 }));
 
 // Connect to MongoDB
