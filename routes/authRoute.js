@@ -134,7 +134,7 @@ router.post('/request-otp', async (req, res) => {
             text: `Your one-time password (OTP) is: ${otp}. This OTP will expire in 10 minutes.`,
         };
 
-        transporter.sendMail(mailOptions, (error, info) => {
+        try {transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error(error);
                 return res.status(500).json({ message: 'Failed to send OTP' });
@@ -142,6 +142,9 @@ router.post('/request-otp', async (req, res) => {
             console.log('OTP sent:', info.response);
             res.status(200).json({ message: 'OTP sent to your email', otpExpiry });
         });
+    }catch{
+        res.status(500).json({ message: 'Failed to send OTP' });
+    }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });

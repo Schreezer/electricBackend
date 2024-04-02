@@ -10,7 +10,7 @@ router.get('/Users', adminAuth, getUsers); // Get all users
 router.post('/create', adminAuth, createUser); // Create a new user
 router.delete('/:id', adminAuth, deleteUser); // Delete a user by ID
 router.patch('/:id', adminAuth, updateUser); // Update a user by ID
-router.post('/:id/bill', adminAuth, addBillData); // Add bill data for a user
+router.post('/addbill', adminAuth, addBillData); // Add bill data for a user
 router.post('/', consumerAuth, getUser); // Get user by ID
 
 module.exports = router;
