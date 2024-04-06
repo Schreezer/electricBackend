@@ -104,6 +104,10 @@ const userSchema = new mongoose.Schema({
     otpExpiry: {
         type: Date,
         required: false
+    },
+    lastAddition: {
+        type: Date,
+        required: false
     }
 });
 
