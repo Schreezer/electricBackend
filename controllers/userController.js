@@ -50,6 +50,7 @@ const addBillData = async (req, res) => {
         await user.save();
         res.status(201).json(user);
     } catch (error) {
+        print(error.message)
         res.status(400).json({ message: error.message });
     }
 }

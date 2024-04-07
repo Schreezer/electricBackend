@@ -112,6 +112,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.methods.addBillData = function(newBillData) {
+    console.log('newBillData is as follows: ', newBillData)
     this.data.push(newBillData);
 };
 
