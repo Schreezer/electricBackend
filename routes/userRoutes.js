@@ -2,8 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const user = require('../models/User.js');
+const constants = require('../models/Constants.js');
 const { createUser, deleteUser, updateUser, addBillData, getUsers, getUser, updateBillData } = require('../controllers/userController.js');
 const { consumerAuth, adminAuth } = require('../middleware/auth.js');
+const { getConstants, getConstantByKey, createConstant, updateConstant } = require('../controllers/constantsController.js');
 
 // Routes for handling user operations
 router.get('/Users', adminAuth, getUsers); // Get all users
@@ -13,5 +15,10 @@ router.post('/updateUser', adminAuth, updateUser); // Update a user by ID
 router.post('/updateBill', adminAuth, updateBillData);
 router.post('/addbill', adminAuth, addBillData); // Add bill data for a user
 router.post('/', consumerAuth, getUser); // Get user by ID
+router.post('/getConstants', adminAuth, getConstants); // Get all constants
+router.post('/getConstantByKey', adminAuth, getConstantByKey);
+router.post('/createConstant', adminAuth, createConstant);
+router.post('/updateConstant', adminAuth, updateConstant);
+
 
 module.exports = router;

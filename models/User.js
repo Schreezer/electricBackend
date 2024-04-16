@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const billData = {
-    // name of consumer
-    consumerName: {
-        type: String,
-        required: true
-    },
+    // // name of consumer
+    // consumerName: {
+    //     type: String,
+    //     required: true
+    // },
     // house number
     houseNumber: {
         type: String,
@@ -79,11 +79,13 @@ const billData = {
     },
 };
 
+
+
 const userSchema = new mongoose.Schema({
-    // name: {
-    //     type: String,
-    //     required: true
-    // },
+    userName: {
+        type: String,
+        required: true
+    },
     
     email: {
         type: String,
