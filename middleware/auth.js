@@ -47,7 +47,7 @@ const adminAuth = (req, res, next) => {
         }
 
         getUserTypeById(decoded.userId).then((userType) => {
-            if (userType !== 'admin') {
+            if (userType && userType.toLowerCase() !== 'admin') {
                 return res.status(403).json({ message: 'Unauthorized' });
             } else {
                 req.user = decoded;

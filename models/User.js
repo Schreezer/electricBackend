@@ -115,5 +115,5 @@ userSchema.methods.addBillData = function(newBillData) {
     console.log('newBillData is as follows: ', newBillData)
     this.data.push(newBillData);
 };
-
+// module.exports = mongoose.model('Bill', billData);
 module.exports = mongoose.model('User', userSchema);
