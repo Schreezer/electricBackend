@@ -4,12 +4,26 @@ const User = require('../models/User');
 
 const createUser = async (req, res) => {
     try {
-        const { email, houseNumber, userType, userName } = req.body;
-        const user = new User({ email, houseNumber, userType, userName});
+        const { email, houseNumber, userType, userName, consumerType, meterNumber } = req.body;
+
+        // Check if email or house number already exist
+        const existingUser = await User.findOne({ $or: [{ email }, { houseNumber }] });
+        if (existingUser) {
+            let message = '';
+            if (existingUser.email === email) {
+                message += 'Email already exists. ';
+            }
+            if (existingUser.houseNumber === houseNumber) {
+                message += 'House number already exists.';
+            }
+            return res.status(400).json({ message });
+        }
+
+        const user = new User({ email, houseNumber, userType, userName, consumerType, meterNumber});
         await user.save();
         res.status(201).json(user);
     } catch (error) {
-        res.status(400).json({ message: res.json(error.message) });
+        res.status(400).json({ message: error.message });
     }
 }
 

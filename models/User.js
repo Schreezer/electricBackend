@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const billData = {
     // // name of consumer
-    // consumerName: {
-    //     type: String,
-    //     required: true
-    // },
+    consumerName: {
+        type: String,
+        required: true
+    },
     // house number
     houseNumber: {
         type: String,
@@ -84,7 +84,15 @@ const billData = {
 const userSchema = new mongoose.Schema({
     userName: {
         type: String,
-        required: true
+        required: false
+    },
+    consumerType:{
+        type: String,
+        required: false
+    },
+    meterNumber: {
+        type: String,
+        required: false
     },
     
     email: {

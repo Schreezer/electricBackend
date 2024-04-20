@@ -37,12 +37,11 @@ const createConstant = async (req, res) => {
 // Update a constant
 const updateConstant = async (req, res) => {
     try {
-        const constant = await Constants.findByIdAndUpdate(req.body.id, req.body);
+        const constant = await Constants.findOneAndUpdate({ key: req.body.key }, { value: req.body.value }, { new: true });
         if (!constant) {
             return res.status(404).json({ message: 'Constant not found' });
         }
-        const updatedConstant = await Constants.findById(req.body.id);
-        res.status(200).json(updatedConstant);
+        res.status(200).json(constant);
     }
     catch (error) {
         res.status(400).json({ message: error.message });
