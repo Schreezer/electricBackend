@@ -5,7 +5,8 @@ const User = require('./models/User');
 const userRoute = require('./routes/userRoutes');
 const authRoute = require('./routes/authRoute');
 const cors = require('cors');
-
+const userSocketIdMap = require('./socketMap.js');
+const socketIo = require('socket.io');
 // Create an Express app
 const app = express();
 
@@ -30,6 +31,22 @@ app.use(express.urlencoded({ extended: false }));
 // Define a basic route for the root endpoint
 app.get("/", (req, res) => {
     res.send("Hello from Node API Server Updated");
+});
+
+io.on('connection', (socket) => {
+    socket.on('register', (userId) => {
+        userSocketIdMap[userId] = socket.id;
+    });
+
+    socket.on('disconnect', () => {
+        // Remove the socket ID from the map when the user disconnects
+        for (let userId in userSocketIdMap) {
+            if (userSocketIdMap[userId] === socket.id) {
+                delete userSocketIdMap[userId];
+                break;
+            }
+        }
+    });
 });
 
 // Start the server listening on port 3000

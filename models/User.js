@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 
+
+const comment = {
+    text: String,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    writer:{
+        type: String,
+        required: true
+    }
+}
 const billData = {
     // // name of consumer
     consumerName: {
@@ -19,7 +31,7 @@ const billData = {
     // type
     type: {
         type: String,
-        required: true
+        required: false
     },
     // start date
     startDate: {
@@ -77,7 +89,13 @@ const billData = {
         type: Date,
         required: true
     },
+    comments: [
+        comment
+      ]
+    
 };
+
+
 
 
 
