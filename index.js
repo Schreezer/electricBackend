@@ -1,14 +1,22 @@
 // Import required modules
 const express = require('express');
+const http = require('http');
 const mongoose = require('mongoose');
 const User = require('./models/User');
 const userRoute = require('./routes/userRoutes');
 const authRoute = require('./routes/authRoute');
 const cors = require('cors');
-const userSocketIdMap = require('./socketMap.js');
+const billSocketIdMap = require('./socketMap.js');
 const socketIo = require('socket.io');
+
 // Create an Express app
 const app = express();
+
+// Create an HTTP server and attach the Express app to it
+const server = http.createServer(app);
+
+// Attach the Socket.IO server to the HTTP server
+const io = socketIo(server);
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -34,22 +42,25 @@ app.get("/", (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    socket.on('register', (userId) => {
-        userSocketIdMap[userId] = socket.id;
+    socket.on('register', (billId) => {
+        if (!billSocketIdMap[billId]) {
+            billSocketIdMap[billId] = [];
+        }
+        billSocketIdMap[billId].push(socket.id);
     });
 
     socket.on('disconnect', () => {
         // Remove the socket ID from the map when the user disconnects
-        for (let userId in userSocketIdMap) {
-            if (userSocketIdMap[userId] === socket.id) {
-                delete userSocketIdMap[userId];
-                break;
+        for (let billId in billSocketIdMap) {
+            const index = billSocketIdMap[billId].indexOf(socket.id);
+            if (index !== -1) {
+                billSocketIdMap[billId].splice(index, 1);
             }
         }
     });
 });
 
 // Start the server listening on port 3000
-app.listen(3000, () => {
+server.listen(3000, () => {
     console.log('Server listening on port 3000');
 });

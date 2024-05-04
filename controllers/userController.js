@@ -3,7 +3,7 @@
 const User = require('../models/User');
 require('dotenv').config();
 const nodemailer = require('nodemailer');
-
+const billSocketIdMap = require('./socketMap.js');
 // Nodemailer configuration
 const transporter = nodemailer.createTransport({
     service: 'gmail', // or your email service provider
@@ -31,7 +31,7 @@ const createUser = async (req, res) => {
             return res.status(400).json({ message });
         }
 
-        const user = new User({ email, houseNumber, userType, userName, consumerType, meterNumber});
+        const user = new User({ email, houseNumber, userType, userName, consumerType, meterNumber });
         await user.save();
         res.status(201).json(user);
     } catch (error) {
@@ -107,7 +107,7 @@ const addBillData = async (req, res) => {
 //         if (!bill) {
 //             return res.status(404).json({ message: 'Bill not found' });
 //         }
-        
+
 //         // Update bill with data from req.body.data
 //         bill = req.body.data;
 //         await bill.save();
@@ -128,7 +128,7 @@ const updateBillData = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
+
         // Attempt to update the bill within the user document
         const updateResult = await User.updateOne(
             { _id: userId, 'data._id': billId },
@@ -178,7 +178,7 @@ const addComment = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        else{
+        else {
             console.log("User found");
         }
 
@@ -187,7 +187,7 @@ const addComment = async (req, res) => {
         if (!bill) {
             return res.status(404).json({ message: 'Bill not found' });
         }
-        else{
+        else {
             console.log("Bill found");
             console.log(bill.dateOfIssue);
         }
@@ -201,6 +201,13 @@ const addComment = async (req, res) => {
 
         // Save the user document
         await user.save();
+
+        const socketIds = billSocketIdMap[billId];
+        if (socketIds) {
+            socketIds.forEach(socketId => {
+                io.to(socketId).emit('commentAdded', { text: comment, writer: writer });
+            });
+        }
 
         // Successfully added comment
         res.status(200).json({ message: 'Comment added successfully', comment: { text: comment, writer: writer } });

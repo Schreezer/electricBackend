@@ -1,3 +1,3 @@
 // socketMap.js
-let userSocketIdMap = {};
-module.exports = userSocketIdMap;
+let billSocketIdMap = {};
+module.exports = billSocketIdMap;
