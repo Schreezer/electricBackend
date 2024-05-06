@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const comment = {
     text: String,
-    createdAt: {
+    date: {
         type: Date,
         default: Date.now
     },

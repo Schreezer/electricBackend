@@ -42,17 +42,19 @@ app.get("/", (req, res) => {
 });
 
 io.on('connection', (socket) => {
+    console.log("we are connecting");
     socket.on('register', (billId) => {
         console.log(`Registering socket ${socket.id} for bill ${billId}`);
         if (!billSocketIdMap[billId]) {
             billSocketIdMap[billId] = [];
         }
         billSocketIdMap[billId].push(socket.id);
-        
+
     });
 
 
     socket.on('disconnect', () => {
+        console.log("we are disconnecting from one of those");
         // Remove the socket ID from the map when the user disconnects
         for (let billId in billSocketIdMap) {
             const index = billSocketIdMap[billId].indexOf(socket.id);
@@ -62,18 +64,46 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on("newComment", (value) => {
-        console.log("Sending comment");
-        const billId = value.billId;
-        const comment = value.comment;
-        // Do something with billId and comment...
-    });
-    socket.on('getComments', async (value) => {
-        console.log("getting comments");
+    // socket.on("newComment", async (value) => {
+    //     console.log("Adding new comment");
+    //     const billId = value.billId;
+    //     const comment = value.comment;
+    //     const userId = value.userId;
+    //     // Do something with billId and comment...
+    //     const user = User.findById(userId);
+    //     let bill = user.data.id(billId);
+    //     if (!user) {
+    //         console.log('User not found');
+    //         return;
+    //     }
+    //     // const bill = user.data.id(billId);
+    //     if (!bill) {
+    //         console.log('Bill not found');
+    //         return;
+    //     }
+    //     bill.comments.push({
+    //         text: comment,
+    //         writer: userId,
+    //         createdAt: Date.now()
+    //     });
+    //     await user.save();
+    //     const socketIds = billSocketIdMap[billId];
+    //     if (socketIds) {
+    //         socketIds.forEach((socketId) => {
+    //             io.to(socketId).emit('commentAdded', { text: comment, writer: userId });
+    //         });
+    //     }
+
+
+    // });
+
+
+    socket.on('newComment', async (value) => {
+        console.log("Adding new comment as "+value.comment);
         const userId = value.userId;
         const billId = value.billId;
+        const comment = value.comment;
         const socketIds = billSocketIdMap[billId];
-
         const user = await User.findById(userId);
         if (!user) {
             console.log('User not found');
@@ -81,6 +111,38 @@ io.on('connection', (socket) => {
         }
 
         const bill = user.data.id(billId);
+        // const bill = user.data.id(billId);
+        if (!bill) {
+            console.log('Bill not found');
+            return;
+        }
+
+        bill.comments.push({
+            text: comment,
+            writer: user.userType,
+            date: Date.now()
+        });
+        
+        await user.save();
+        if (socketIds) {
+            socketIds.forEach((socketId) => {
+                io.to(socketId).emit('commentAdded', bill.comments );
+            });
+        }
+    });
+    socket.on('getComments', async (value) => {
+        console.log("getting comments");
+        const userId = value.userId;
+        const billId = value.billId;
+        const socketIds = billSocketIdMap[billId];
+        const user = await User.findById(userId);
+        if (!user) {
+            console.log('User not found');
+            return;
+        }
+
+        const bill = user.data.id(billId);
+        // const bill = user.data.id(billId);
         if (!bill) {
             console.log('Bill not found');
             return;

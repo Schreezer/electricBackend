@@ -196,18 +196,18 @@ const addComment = async (req, res) => {
         bill.comments.push({
             text: comment,
             writer: writer,
-            createdAt: Date.now()
+            date: Date.now()
         });
 
         // Save the user document
         await user.save();
 
-        const socketIds = billSocketIdMap[billId];
-        if (socketIds) {
-            socketIds.forEach(socketId => {
-                io.to(socketId).emit('commentAdded', { text: comment, writer: writer });
-            });
-        }
+        // const socketIds = billSocketIdMap[billId];
+        // if (socketIds) {
+        //     socketIds.forEach(socketId => {
+        //         io.to(socketId).emit('commentAdded', { text: comment, writer: writer });
+        //     });
+        // }
 
         // Successfully added comment
         res.status(200).json({ message: 'Comment added successfully', comment: { text: comment, writer: writer } });
