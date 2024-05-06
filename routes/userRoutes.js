@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const user = require('../models/User.js');
 const constants = require('../models/Constants.js');
-const { createUser, deleteUser, updateUser, addBillData, getUsers, getUser, updateBillData, addComment } = require('../controllers/userController.js');
+const { createUser, deleteUser, updateUser, addBillData, getUsers, getUser, updateBillData, addComment, fetchComments} = require('../controllers/userController.js');
 const { consumerAuth, adminAuth } = require('../middleware/auth.js');
 const { getConstants, getConstantByKey, createConstant, updateConstant } = require('../controllers/constantsController.js');
 
@@ -20,5 +20,6 @@ router.post('/getConstantByKey', adminAuth, getConstantByKey);
 router.post('/createConstant', adminAuth, createConstant);
 router.post('/updateConstant', adminAuth, updateConstant);
 router.post('/addComment', consumerAuth, addComment); // Add comment to a user's bill
+router.post('fetchComments', consumerAuth, fetchComments); // Fetch comments for a user's bill
 
 module.exports = router;

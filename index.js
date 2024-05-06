@@ -43,11 +43,14 @@ app.get("/", (req, res) => {
 
 io.on('connection', (socket) => {
     socket.on('register', (billId) => {
+        console.log(`Registering socket ${socket.id} for bill ${billId}`);
         if (!billSocketIdMap[billId]) {
             billSocketIdMap[billId] = [];
         }
         billSocketIdMap[billId].push(socket.id);
+        
     });
+
 
     socket.on('disconnect', () => {
         // Remove the socket ID from the map when the user disconnects
@@ -56,6 +59,37 @@ io.on('connection', (socket) => {
             if (index !== -1) {
                 billSocketIdMap[billId].splice(index, 1);
             }
+        }
+    });
+
+    socket.on("newComment", (value) => {
+        console.log("Sending comment");
+        const billId = value.billId;
+        const comment = value.comment;
+        // Do something with billId and comment...
+    });
+    socket.on('getComments', async (value) => {
+        console.log("getting comments");
+        const userId = value.userId;
+        const billId = value.billId;
+        const socketIds = billSocketIdMap[billId];
+
+        const user = await User.findById(userId);
+        if (!user) {
+            console.log('User not found');
+            return;
+        }
+
+        const bill = user.data.id(billId);
+        if (!bill) {
+            console.log('Bill not found');
+            return;
+        }
+
+        if (socketIds) {
+            socketIds.forEach((socketId) => {
+                io.to(socketId).emit('comments', { comments: bill.comments, billId, userId });
+            });
         }
     });
 });

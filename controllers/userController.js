@@ -3,7 +3,7 @@
 const User = require('../models/User');
 require('dotenv').config();
 const nodemailer = require('nodemailer');
-const billSocketIdMap = require('./socketMap.js');
+const billSocketIdMap = require('../socketMap.js');
 // Nodemailer configuration
 const transporter = nodemailer.createTransport({
     service: 'gmail', // or your email service provider
@@ -217,6 +217,26 @@ const addComment = async (req, res) => {
     }
 };
 
+const fetchComments = async (req, res) => {
+    try {
+        const { userId, billId } = req.body;
+        // Verify if the user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const bill = user.data.id(billId);
+        if (!bill) {
+            return res.status(404).json({ message: 'Bill not found' });
+        }
+        res.status(200).json({ comments: bill.comments });
+    }
+    catch (error) {
+        console.error('Error fetching comments:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getUser,
     getUsers,
@@ -226,4 +246,5 @@ module.exports = {
     updateUser,
     updateBillData,
     addComment,
+    fetchComments,
 };
