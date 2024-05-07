@@ -132,9 +132,8 @@ const updateBillData = async (req, res) => {
         // Attempt to update the bill within the user document
         const updateResult = await User.updateOne(
             { _id: userId, 'data._id': billId },
-            { $set: { 'data.$': { ...data, _id: billId } } } // Update the matched bill with new data, ensuring the bill ID remains unchanged
+            { $set: { 'data.$': { ...data, _id: billId, comments: bill.comments } } } // Update the matched bill with new data, ensuring the bill ID remains unchanged and comments array remains unchanged
         );
-
         // Check if the bill was found and updated
         if (updateResult.modifiedCount === 0) {
             return res.status(404).json({ message: 'Bill not found or update failed' });

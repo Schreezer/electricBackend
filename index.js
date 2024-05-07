@@ -8,6 +8,7 @@ const authRoute = require('./routes/authRoute');
 const cors = require('cors');
 const billSocketIdMap = require('./socketMap.js');
 const socketIo = require('socket.io');
+const { writer } = require('repl');
 
 // Create an Express app
 const app = express();
@@ -23,7 +24,7 @@ app.use(express.json());
 
 // Enable CORS for a specific origin (replace with actual Flutter app origin)
 app.use(cors({
-    origin: 'http://localhost:8080'
+    origin: ['http://localhost:8080', 'http://localhost:8090']
 }));
 
 // Connect to MongoDB
@@ -103,13 +104,17 @@ io.on('connection', (socket) => {
         const userId = value.userId;
         const billId = value.billId;
         const comment = value.comment;
+        const writerType = value.writer;
         const socketIds = billSocketIdMap[billId];
         const user = await User.findById(userId);
+        console.log("User Id is "+userId);
+        console.log("Bill Id is "+billId);
+        console.log("Comment is "+comment);
+        console.log("Writer is "+writerType);
         if (!user) {
             console.log('User not found');
             return;
         }
-
         const bill = user.data.id(billId);
         // const bill = user.data.id(billId);
         if (!bill) {
@@ -119,9 +124,10 @@ io.on('connection', (socket) => {
 
         bill.comments.push({
             text: comment,
-            writer: user.userType,
+            writer: writerType,
             date: Date.now()
         });
+
         
         await user.save();
         if (socketIds) {
