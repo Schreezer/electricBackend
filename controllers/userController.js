@@ -129,6 +129,18 @@ const updateBillData = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        // Find the bill within the user's data
+        // Find the bill within the user's data
+        const bill = user.data.id(billId);
+        if (!bill) {
+            return res.status(404).json({ message: 'Bill not found' });
+        }
+        else {
+            console.log("Bill found");
+            console.log(bill.dateOfIssue);
+        }
+
+
         // Attempt to update the bill within the user document
         const updateResult = await User.updateOne(
             { _id: userId, 'data._id': billId },
