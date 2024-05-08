@@ -141,13 +141,13 @@ io.on('connection', (socket) => {
         });
 
         // send a mail to the Comsumer if the comment is added by admin, else send the mail to admin
-        if(writerType === 'admin'){
+        if(writerType.toLowerCase() === 'admin'){
             console.log("Sending mail to Consumer");
             let mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: user.email,
                 subject: "Comment Added",
-                text: ("New Comment Added to your Bill of issue date: ."+bill.dateOfIssue+" \nComment: as "+comment)
+                text: ("New Comment Added by Admin to your Bill of issue date: ."+bill.dateOfIssue+" \nComment:  "+comment)
             }
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {

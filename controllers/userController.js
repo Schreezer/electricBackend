@@ -1,9 +1,11 @@
 // const {User, Bill} = require('../models/User');
-
+const ExcelJS = require('exceljs');
+const path = require('path');
 const User = require('../models/User');
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 const billSocketIdMap = require('../socketMap.js');
+const fs = require('fs');
 // Nodemailer configuration
 const transporter = nodemailer.createTransport({
     service: 'gmail', // or your email service provider
@@ -66,6 +68,157 @@ const updateUser = async (req, res) => {
     }
 }
 
+
+// original 
+// const addBillData = async (req, res) => {
+//     try {
+//         const user = await User.findById(req.body.id);
+//         if (!user) {
+//             return res.status(404).json({ message: 'User not found' });
+//         }
+//         user.addBillData(req.body.data);
+//         await user.save();
+//         // console.log('the user\'s mail id is:')
+//         // console.log(user.email);
+//         let mailOptions = {
+//             from: process.env.EMAIL_USER,
+//             to: user.email,
+//             subject: "Bill Added",
+//             text: "New Bill Added to your account."
+
+//         }
+//         transporter.sendMail(mailOptions, (error, info) => {
+//             if (error) {
+//                 console.error(error);
+//                 return res.status(500).json({ message: 'Failed to send mail' });
+//             }
+//             console.log('Mail sent:', info.response);
+//             res.status(200).json({ message: 'Mail sent to the Resident' });
+//         });
+//         res.status(201).json(user);
+//     } catch (error) {
+//         res.status(400).json({ message: error.message });
+//     }
+// }
+
+// sec
+// const addBillData = async (req, res) => {
+//     try {
+//         const user = await User.findById(req.body.id);
+//         if (!user) {
+//             return res.status(404).json({ message: 'User not found' });
+//         }
+//         user.addBillData(req.body.data);
+//         await user.save();
+
+//         // Create Excel file
+//         let workbook = new ExcelJS.Workbook();
+//         let worksheet = workbook.addWorksheet('Bill');
+//         // worksheet.columns = [
+//         //     { header: 'Item', key: 'item', width: 10 },
+//         //     { header: 'Amount', key: 'amount', width: 10 },
+//         //     // Add more columns as needed
+//         // ];
+//         req.body.data.forEach((item) => {
+//             worksheet.addRow(item);
+//         });
+//         let filePath = path.join('./', 'bill.xlsx');
+//         await workbook.xlsx.writeFile(filePath);
+
+//         let mailOptions = {
+//             from: process.env.EMAIL_USER,
+//             to: user.email,
+//             subject: "Bill Added",
+//             text: "New Bill Added to your account.",
+//             attachments: [
+//                 {
+//                     filename: 'bill.xlsx',
+//                     path: filePath,
+//                 }
+//             ]
+//         }
+//         transporter.sendMail(mailOptions, (error, info) => {
+//             if (error) {
+//                 console.error(error);
+//                 return res.status(500).json({ message: 'Failed to send mail' });
+//             }
+//             console.log('Mail sent:', info.response);
+//             res.status(200).json({ message: 'Mail sent to the Resident' });
+//         });
+//         res.status(201).json(user);
+//     } catch (error) {
+//         res.status(400).json({ message: error.message });
+//     }
+// }
+
+//tert
+
+// const addBillData = async (req, res) => {
+//     try {
+//         const user = await User.findById(req.body.id);
+//         if (!user) {
+//             return res.status(404).json({ message: 'User not found' });
+//         }
+//         user.addBillData(req.body.data);
+//         await user.save();
+
+//         // Create Excel file
+//         let workbook = new ExcelJS.Workbook();
+//         let worksheet = workbook.addWorksheet('Bill');
+//         worksheet.columns = [
+//             { header: 'Type', key: 'key', width: 10 },
+//             { header: 'Value', key: 'value', width: 10 },
+//         ];
+//         Object.entries(req.body.data).forEach(([key, value]) => {
+//             if(key === 'comments') {
+//             }
+//             else if(key === 'startDate' || key === 'endDate' || key === 'dateOfIssue'){
+//                 worksheet.addRow({ key, value: value.toString().substring(0, 10)});
+//             }
+//             else{
+//             worksheet.addRow({ key, value });
+//             }
+//         });
+//         let filePath = path.join(__dirname, 'bill.xlsx');
+//         await workbook.xlsx.writeFile(filePath);
+
+//         let mailOptions = {
+//             from: process.env.EMAIL_USER,
+//             to: user.email,
+//             subject: "Bill Added",
+//             text: "New Bill Added to your account.",
+//             attachments: [
+//                 {
+//                     filename: 'bill.xlsx',
+//                     path: filePath,
+//                 }
+//             ]
+//         }
+//         transporter.sendMail(mailOptions, (error, info) => {
+//             if (error) {
+//                 console.error(error);
+//                 return res.status(500).json({ message: 'Failed to send mail' });
+//             } else {
+//                 console.log('Mail sent:', info.response);
+//                 res.status(200).json({ message: 'Mail sent to the Resident' });
+
+//                 // Delete the file
+//                 fs.unlink(filePath, (err) => {
+//                     if (err) {
+//                         console.error('Error deleting file:', err);
+//                     } else {
+//                         console.log('File deleted');
+//                     }
+//                 });
+//             }
+//         });
+//         res.status(201).json(user);
+//     } catch (error) {
+//         res.status(400).json({ message: error.message });
+//     }
+// }
+
+
 const addBillData = async (req, res) => {
     try {
         const user = await User.findById(req.body.id);
@@ -74,29 +227,77 @@ const addBillData = async (req, res) => {
         }
         user.addBillData(req.body.data);
         await user.save();
-        // console.log('the user\'s mail id is:')
-        // console.log(user.email);
+
+        // Create Excel file
+        let workbook = new ExcelJS.Workbook();
+        let worksheet = workbook.addWorksheet('Bill');
+        
+        worksheet.columns = [
+            { header: 'Type', key: 'key', width: 20, style: { font: { bold: true } } },
+            { header: 'Value', key: 'value', width: 30 }
+        ];
+
+        // Styling
+        const headerFill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFFFFFF' },
+            bgColor: { argb: 'FF0000FF' }
+        };
+        worksheet.getRow(1).font = { bold: true };
+        worksheet.getRow(1).fill = headerFill;
+
+        // Adding data
+        Object.entries(req.body.data).forEach(([key, value]) => {
+            if(key === 'comments') {
+            }
+            else if(key === 'startDate' || key === 'endDate' || key === 'dateOfIssue'){
+                let dateValue = new Date(value);
+                worksheet.addRow({ key, value: dateValue }).getCell(2).numFmt = 'yyyy-mm-dd';
+            }
+            else {
+                worksheet.addRow({ key, value });
+            }
+        });
+
+        let filePath = path.join(__dirname, 'bill.xlsx');
+        await workbook.xlsx.writeFile(filePath);
+
         let mailOptions = {
             from: process.env.EMAIL_USER,
             to: user.email,
             subject: "Bill Added",
-            text: "New Bill Added to your account."
-
+            text: "New Bill Added to your account.",
+            attachments: [
+                {
+                    filename: 'bill.xlsx',
+                    path: filePath,
+                }
+            ]
         }
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error(error);
                 return res.status(500).json({ message: 'Failed to send mail' });
+            } else {
+                console.log('Mail sent:', info.response);
+                res.status(200).json({ message: 'Mail sent to the Resident' });
+
+                // Delete the file
+                fs.unlink(filePath, (err) => {
+                    if (err) {
+                        console.error('Error deleting file:', err);
+                    } else {
+                        console.log('File deleted');
+                    }
+                });
             }
-            console.log('Mail sent:', info.response);
-            res.status(200).json({ message: 'Mail sent to the Resident' });
         });
         res.status(201).json(user);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 }
-
 
 // const updateBillData = async (req, res) => {
 //     try {
