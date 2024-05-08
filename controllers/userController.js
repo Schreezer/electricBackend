@@ -50,6 +50,7 @@ const deleteUser = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 }
+
 // update User
 const updateUser = async (req, res) => {
     try {
@@ -159,6 +160,29 @@ const updateBillData = async (req, res) => {
     }
 };
 
+
+const deleteBill = async (req, res) => {
+    try {
+        console.log("deleting user bill")
+        const {userId, billId} = req.body;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        } 
+        const bill = user.data.id(billId);
+        if (!bill) {
+            return res.status(404).json({ message: 'Bill not found' });
+        }
+        bill.deleteOne();
+
+        await user.save();
+        res.status(200).json({ message: 'Bill deleted successfully' });
+        console.log()
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
 const getUsers = async (req, res) => {
     try {
         const users = await User.find({}, { data: 0 }); // Exclude 'data' field
@@ -248,14 +272,98 @@ const fetchComments = async (req, res) => {
     }
 };
 
+// a function that has the req parameters of type, starting month, and year, so that it returns the total amounts, user names and house numbers of the users' bills who have the same type of consumerType and the same starting month and year of the corresponding bill
+const getBillsByType = async (req, res) => {
+    try {
+        const months = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+        ];
+
+        const { type, month, year } = req.body;
+
+        const monthIndex = months.indexOf(month);
+        if (monthIndex === -1) {
+            // handle error: invalid month
+            console.error(`Invalid month: ${month}`);
+            // return error response to client
+            res.status(400).send({ error: 'Invalid month' });
+            return;
+        }
+
+        // now you can use monthIndex, which is a zero-based index (0-11)
+        console.log(`Month index: ${monthIndex}`);
+
+        const users = await User.find({ consumerType: type });
+        console.log(users);
+        console.log(type, month, year);
+        let dataArray = [];
+        const bills = users.map(user => {
+            return user.data.filter(bill => {
+                const billMonth = new Date(bill.startDate).getMonth();
+                const billYear = new Date(bill.startDate).getFullYear();
+                console.log(billMonth, billYear);
+                if (billMonth.toString() === monthIndex.toString() && billYear.toString() === year.toString()) {
+                    dataArray.push({ totalAmount: bill.totalAmount, userName: user.userName, houseNumber: user.houseNumber, startDate: bill.startDate, endDate: bill.endDate });
+                }
+                return billMonth.toString() === monthIndex.toString() && billYear.toString() === year.toString();
+            });
+        });
+        console.log(dataArray);
+        res.status(200).json({ dataArray });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// const getBillsByType = async (req, res) => {
+//     try {
+//       const { type, month, year } = req.body;
+
+//       // Convert month to a zero-based index (January = 0, February = 1, etc.)
+//       const monthIndex = new Date(year, month - 1).getMonth();
+
+//       const users = await User.find({ consumerType: type });
+
+//       console.log(type, month, year);
+
+//       const bills = users.reduce((acc, user) => {
+//         const userBills = user.data.filter(bill => {
+//           const billDate = new Date(bill.startDate);
+//           const billMonth = billDate.getMonth().toString();
+//           const billYear = billDate.getFullYear();
+
+//           return billMonth === monthIndex && billYear === year;
+//         });
+
+//         return [...acc, ...userBills];
+//       }, []);
+
+//       res.status(200).json({ bills });
+//     } catch (error) {
+//       res.status(500).json({ message: error.message });
+//     }
+//   };
 module.exports = {
     getUser,
     getUsers,
     addBillData,
     createUser,
     deleteUser,
+    deleteBill,
     updateUser,
     updateBillData,
     addComment,
     fetchComments,
+    getBillsByType,
 };

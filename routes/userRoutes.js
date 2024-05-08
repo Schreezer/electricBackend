@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const user = require('../models/User.js');
 const constants = require('../models/Constants.js');
-const { createUser, deleteUser, updateUser, addBillData, getUsers, getUser, updateBillData, addComment, fetchComments} = require('../controllers/userController.js');
+const { createUser, deleteUser, updateUser, addBillData,deleteBill, getUsers, getUser, updateBillData, addComment, fetchComments, getBillsByType} = require('../controllers/userController.js');
 const { consumerAuth, adminAuth } = require('../middleware/auth.js');
 const { getConstants, getConstantByKey, createConstant, updateConstant } = require('../controllers/constantsController.js');
 
@@ -21,5 +21,8 @@ router.post('/createConstant', adminAuth, createConstant);
 router.post('/updateConstant', adminAuth, updateConstant);
 router.post('/addComment', consumerAuth, addComment); // Add comment to a user's bill
 router.post('fetchComments', consumerAuth, fetchComments); // Fetch comments for a user's bill
+router.post('/getBillsByType', adminAuth, getBillsByType); // Get bills by type
+router.post('/deleteBill', adminAuth, deleteBill); // Delete a bill by ID
+router.post('/deleteUser', adminAuth, deleteUser); // Delete a comment by ID
 
 module.exports = router;

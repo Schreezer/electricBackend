@@ -9,9 +9,21 @@ const cors = require('cors');
 const billSocketIdMap = require('./socketMap.js');
 const socketIo = require('socket.io');
 const { writer } = require('repl');
+require('dotenv').config();
+const nodemailer = require('nodemailer');
 
 // Create an Express app
 const app = express();
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // or your email service provider
+    host: 'smtp.gmail.com',
+    port: 587,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+});
 
 // Create an HTTP server and attach the Express app to it
 const server = http.createServer(app);
@@ -127,6 +139,45 @@ io.on('connection', (socket) => {
             writer: writerType,
             date: Date.now()
         });
+
+        // send a mail to the Comsumer if the comment is added by admin, else send the mail to admin
+        if(writerType === 'admin'){
+            console.log("Sending mail to Consumer");
+            let mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: user.email,
+                subject: "Comment Added",
+                text: ("New Comment Added to your Bill of issue date: ."+bill.dateOfIssue+" \nComment: as "+comment)
+            }
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error(error);
+                    return res.status(500).json({ message: 'Failed to send mail' });
+                }
+                console.log('Mail sent:', info.response);
+                res.status(200).json({ message: 'Mail sent to the Resident' });
+            });
+        }
+        else{
+            if(writerType === 'Consumer'){
+                console.log("Sending mail to Admin");
+                let mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: user.email,
+                    subject: "Comment Added",
+                    text: ("New Comment Added by the consumer "+bill.consumerName+" from House Number: "+bill.houseNumber+" to your Bill of issue date: ."+bill.dateOfIssue+" \nComment: as "+comment)
+                }
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error(error);
+                        return res.status(500).json({ message: 'Failed to send mail' });
+                    }
+                    console.log('Mail sent:', info.response);
+                    res.status(200).json({ message: 'Mail sent to the Resident' });
+                });
+            }
+            console.log("Sending mail to Admin");
+        }
 
         
         await user.save();
